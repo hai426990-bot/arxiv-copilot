@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>因果结构发现：连续优化算法研究现状</title>
+    <meta
+      name="description"
+      content="概览因果结构发现（Causal Structure Discovery）中连续优化算法的研究进展、代表性工作与资源汇总。"
+    />
+    <meta property="og:title" content="因果结构发现：连续优化算法研究现状" />
+    <meta
+      property="og:description"
+      content="了解 NOTEARS、DAG-GNN、GOLEM、DAGMA 等连续优化方法的核心思想、对比与开源资源。"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="assets/logo.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Radio+Canada:wght@500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body data-theme="light">
+    <a class="skip-link" href="#main">跳到主内容</a>
+    <header class="site-header" id="top">
+      <div class="top-bar">
+        <div class="brand" aria-label="站点标识">
+          <img src="assets/logo.svg" alt="因果结构发现标识" />
+          <span>因果结构发现</span>
+        </div>
+        <button class="nav-toggle" aria-expanded="false" aria-controls="primary-navigation">
+          <span class="sr-only">展开导航</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+        </button>
+        <nav class="main-nav" id="primary-navigation" aria-label="主导航">
+          <a href="#overview">概述</a>
+          <a href="#taxonomy">方法分类</a>
+          <a href="#works">代表性工作</a>
+          <a href="#comparison">方法对比</a>
+          <a href="#resources">开源资源</a>
+          <a href="#references">参考文献</a>
+        </nav>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切换暗色模式">🌙</button>
+      </div>
+      <div class="hero" role="banner">
+        <div class="hero-content container">
+          <p class="hero-eyebrow">研究前沿速览</p>
+          <h1>因果结构发现：连续优化算法研究现状</h1>
+          <p class="hero-subtitle">
+            通过可微无环约束与神经网络建模，连续优化方法正推动因果结构发现的可扩展性与应用落地。
+            <span id="last-updated" class="hero-updated" aria-live="polite"></span>
+          </p>
+          <div class="hero-actions">
+            <a class="hero-link" href="#works">查看代表性工作</a>
+            <a class="hero-link secondary" href="https://github.com/<用户名>/arxiv-copilot" target="_blank" rel="noopener">贡献/反馈</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="page-content">
+      <div class="layout container">
+        <aside class="toc" aria-label="页面目录">
+          <h2>内容导览</h2>
+          <ol>
+            <li><a href="#overview">概述</a></li>
+            <li><a href="#taxonomy">方法分类</a></li>
+            <li><a href="#works">代表性工作</a></li>
+            <li><a href="#comparison">方法对比表</a></li>
+            <li><a href="#resources">开源资源</a></li>
+            <li><a href="#references">参考文献</a></li>
+          </ol>
+        </aside>
+
+        <div class="content">
+          <section id="overview" class="section">
+            <h2>概述</h2>
+            <p>
+              因果结构发现（Causal Structure Discovery, CSD）旨在从观测数据中恢复变量之间的因果关系，并以有向无环图（DAG）形式呈现。传统方法依赖组合搜索或基于得分的离散优化，易受无环约束与搜索空间爆炸的限制。连续优化范式通过将结构学习问题嵌入可微空间，并引入光滑的无环约束，使得梯度方法能够直接在参数化的邻接矩阵上迭代更新，从而兼顾可扩展性与建模灵活度。
+            </p>
+            <p>
+              可微无环约束（如 NOTEARS 中提出的矩阵分析方法）是该范式的核心，它在保持 DAG 结构的同时启用了标准的优化器。随着神经网络、得分匹配以及多项式刻画等技术的引入，连续优化方法在高维数据、非线性结构方程和真实应用（干预预测、结构发现助力科学研究等）中展现出潜力。然而，这类方法仍面临初始解敏感、局部最优、可解释性与尺度拓展等挑战。
+            </p>
+          </section>
+
+          <section id="taxonomy" class="section">
+            <h2>方法分类</h2>
+            <div class="method-grid">
+              <article class="method-card">
+                <h3>NOTEARS 系列</h3>
+                <p>
+                  通过光滑矩阵函数实现可微无环约束，在线性和非线性结构方程模型中均可应用。代表工作包括 NOTEARS、NOTEARS-MLP 等，强调利用优化器直接在邻接矩阵上迭代更新。
+                </p>
+              </article>
+              <article class="method-card">
+                <h3>神经网络驱动方法</h3>
+                <p>
+                  如 DAG-GNN、GraN-DAG 将生成式模型或图神经网络融入结构学习，借助深度网络表达复杂的因果函数，通过连续松弛实现端到端训练。
+                </p>
+              </article>
+              <article class="method-card">
+                <h3>改进的无环刻画</h3>
+                <p>
+                  GOLEM、DAGMA 等工作探索替代的无环约束形式，减少计算开销或增强优化稳定性，为高维场景提供更高效的连续优化流程。
+                </p>
+              </article>
+              <article class="method-card">
+                <h3>其他连续/近似连续方法</h3>
+                <p>
+                  包括基于流形优化、拉格朗日乘子与拍扁松弛的变体，针对特定数据类型（如时间序列、离散变量）提出定制的连续优化策略。
+                </p>
+              </article>
+            </div>
+          </section>
+
+          <section id="works" class="section">
+            <div class="section-heading">
+              <h2>代表性工作</h2>
+              <p>下列卡片根据 <code>docs/data/papers.json</code> 中的条目实时渲染，可按关键词与类别过滤。</p>
+            </div>
+            <div class="filters" role="search">
+              <label for="search-input" class="sr-only">搜索关键词</label>
+              <input
+                id="search-input"
+                type="search"
+                placeholder="搜索标题、作者、年份或关键词"
+                aria-label="搜索代表性工作"
+              />
+              <label for="category-select" class="sr-only">方法类别</label>
+              <select id="category-select" aria-label="筛选方法类别">
+                <option value="all">全部类别</option>
+              </select>
+            </div>
+            <div id="papers-container" class="papers-grid" aria-live="polite"></div>
+            <p id="papers-empty" class="empty-state" hidden>没有匹配的条目，请调整搜索条件。</p>
+          </section>
+
+          <section id="comparison" class="section">
+            <div class="section-heading">
+              <h2>方法对比表</h2>
+              <p>概览各方法的非线性能力、可扩展性、无环约束形式与官方代码发布情况。</p>
+            </div>
+            <div class="table-wrapper" role="region" aria-live="polite">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">方法</th>
+                    <th scope="col">类别</th>
+                    <th scope="col">非线性支持</th>
+                    <th scope="col">可扩展性 / 复杂度</th>
+                    <th scope="col">无环约束方式</th>
+                    <th scope="col">官方代码</th>
+                  </tr>
+                </thead>
+                <tbody id="comparison-body"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="resources" class="section">
+            <h2>开源资源</h2>
+            <ul class="resource-list">
+              <li>
+                <a href="https://github.com/xunzheng/notears" target="_blank" rel="noopener">
+                  NOTEARS 官方实现
+                </a>
+                <span>线性与非线性扩展的 PyTorch 实现，包含实验脚本与示例数据。</span>
+              </li>
+              <li>
+                <a href="https://github.com/caml-ml/golem" target="_blank" rel="noopener">
+                  GOLEM 开源仓库
+                </a>
+                <span>提供得分匹配方法的参考实现，并包含模拟数据生成工具。</span>
+              </li>
+              <li>
+                <a href="https://github.com/kevinsbello/dagma" target="_blank" rel="noopener">
+                  DAGMA 项目页
+                </a>
+                <span>展示单调多项式无环刻画的算法细节与实验。</span>
+              </li>
+              <li>
+                <a href="https://github.com/py-why/pywhy-graphs" target="_blank" rel="noopener">
+                  PyWhy Graphs 工具集
+                </a>
+                <span>微软开源的因果推断生态，涵盖结构学习、干预推断等模块。</span>
+              </li>
+              <li>
+                <a href="https://www.causalnex.com/" target="_blank" rel="noopener">
+                  CausalNex 平台
+                </a>
+                <span>结构学习与贝叶斯网络分析套件，可与连续优化方法互补。</span>
+              </li>
+            </ul>
+          </section>
+
+          <section id="references" class="section">
+            <h2>参考文献</h2>
+            <ol id="references-list"></ol>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>© <span id="current-year"></span> 因果结构发现研究速览</p>
+        <p>
+          页面源码：
+          <a href="https://github.com/<用户名>/arxiv-copilot" target="_blank" rel="noopener">GitHub 仓库</a>
+          · 反馈请提交 Issue 或 PR
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const body = document.body;
+        const themeToggle = document.getElementById('theme-toggle');
+        const navToggle = document.querySelector('.nav-toggle');
+        const primaryNav = document.getElementById('primary-navigation');
+        const searchInput = document.getElementById('search-input');
+        const categorySelect = document.getElementById('category-select');
+        const papersContainer = document.getElementById('papers-container');
+        const papersEmpty = document.getElementById('papers-empty');
+        const comparisonBody = document.getElementById('comparison-body');
+        const referencesList = document.getElementById('references-list');
+        const lastUpdatedEl = document.getElementById('last-updated');
+        const currentYearEl = document.getElementById('current-year');
+        const prefersDark = window.matchMedia
+          ? window.matchMedia('(prefers-color-scheme: dark)')
+          : { matches: false };
+        let storedTheme = localStorage.getItem('csd-theme');
+        let papersData = [];
+
+        const formatDate = (date) =>
+          date.toLocaleDateString('zh-CN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+
+        if (lastUpdatedEl) {
+          lastUpdatedEl.textContent = `（更新于 ${formatDate(new Date())}）`;
+        }
+
+        if (currentYearEl) {
+          currentYearEl.textContent = new Date().getFullYear();
+        }
+
+        const applyTheme = (theme) => {
+          body.dataset.theme = theme;
+          themeToggle.setAttribute(
+            'aria-label',
+            theme === 'dark' ? '切换为浅色模式' : '切换为深色模式'
+          );
+          themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+        };
+
+        const initTheme = () => {
+          const initial = storedTheme || (prefersDark.matches ? 'dark' : 'light');
+          applyTheme(initial);
+        };
+
+        initTheme();
+
+        themeToggle.addEventListener('click', () => {
+          const nextTheme = body.dataset.theme === 'dark' ? 'light' : 'dark';
+          storedTheme = nextTheme;
+          localStorage.setItem('csd-theme', nextTheme);
+          applyTheme(nextTheme);
+        });
+
+        const handlePreferenceChange = (event) => {
+          if (!storedTheme) {
+            applyTheme(event.matches ? 'dark' : 'light');
+          }
+        };
+
+        if (typeof prefersDark.addEventListener === 'function') {
+          prefersDark.addEventListener('change', handlePreferenceChange);
+        } else if (typeof prefersDark.addListener === 'function') {
+          prefersDark.addListener(handlePreferenceChange);
+        }
+
+        if (navToggle && primaryNav) {
+          navToggle.addEventListener('click', () => {
+            const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+            navToggle.setAttribute('aria-expanded', String(!expanded));
+            primaryNav.classList.toggle('is-open');
+          });
+
+          primaryNav.querySelectorAll('a').forEach((link) => {
+            link.addEventListener('click', () => {
+              if (window.matchMedia('(max-width: 768px)').matches) {
+                navToggle.setAttribute('aria-expanded', 'false');
+                primaryNav.classList.remove('is-open');
+              }
+            });
+          });
+        }
+
+        const renderPapers = (data) => {
+          papersContainer.innerHTML = '';
+          if (!data.length) {
+            papersEmpty.hidden = false;
+            return;
+          }
+          papersEmpty.hidden = true;
+
+          data.forEach((paper) => {
+            const card = document.createElement('article');
+            card.className = 'paper-card';
+            card.innerHTML = `
+              <header>
+                <p class="paper-category">${paper.category || '未分类'}</p>
+                <h3>${paper.title}</h3>
+                <p class="paper-meta">${paper.authors || '佚名'} · ${paper.year || '年份未知'}${paper.venue ? ' · ' + paper.venue : ''}</p>
+              </header>
+              <p class="paper-summary">${paper.summary || paper.notes || ''}</p>
+              <dl class="paper-detail">
+                <div>
+                  <dt>非线性支持</dt>
+                  <dd>${paper.supportsNonlinear || '待补充'}</dd>
+                </div>
+                <div>
+                  <dt>可扩展性</dt>
+                  <dd>${paper.scalability || '待补充'}</dd>
+                </div>
+                <div>
+                  <dt>无环约束</dt>
+                  <dd>${paper.constraint || '待补充'}</dd>
+                </div>
+              </dl>
+              <footer class="paper-links">
+                ${
+                  paper.arxiv
+                    ? `<a href="${paper.arxiv}" target="_blank" rel="noopener">arXiv</a>`
+                    : '<span class="muted">arXiv 信息待补充</span>'
+                }
+                ${
+                  paper.codeUrl
+                    ? `<a href="${paper.codeUrl}" target="_blank" rel="noopener">代码</a>`
+                    : '<span class="muted">暂无官方代码</span>'
+                }
+              </footer>
+            `;
+            papersContainer.appendChild(card);
+          });
+        };
+
+        const renderTable = (data) => {
+          comparisonBody.innerHTML = '';
+          if (!data.length) {
+            comparisonBody.innerHTML = '<tr><td colspan="6">没有匹配的条目</td></tr>';
+            return;
+          }
+
+          data.forEach((paper) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td data-label="方法">${paper.title}</td>
+              <td data-label="类别">${paper.category || '未分类'}</td>
+              <td data-label="非线性支持">${paper.supportsNonlinear || '待补充'}</td>
+              <td data-label="可扩展性 / 复杂度">${paper.scalability || '待补充'}</td>
+              <td data-label="无环约束方式">${paper.constraint || '待补充'}</td>
+              <td data-label="官方代码">${paper.officialCode ? '是' : '否'}</td>
+            `;
+            comparisonBody.appendChild(row);
+          });
+        };
+
+        const renderReferences = (data) => {
+          referencesList.innerHTML = '';
+          data.forEach((paper) => {
+            const item = document.createElement('li');
+            item.innerHTML = `
+              ${paper.authors || '佚名'} (${paper.year || '年份未知'}). <strong>${paper.title}</strong>${
+              paper.venue ? `, ${paper.venue}` : ''
+            }. ${paper.arxiv ? `<a href="${paper.arxiv}" target="_blank" rel="noopener">arXiv:${paper.arxiv.replace('https://arxiv.org/abs/', '')}</a>` : ''}
+            `;
+            referencesList.appendChild(item);
+          });
+        };
+
+        const populateCategories = (data) => {
+          const categories = Array.from(
+            new Set(data.map((paper) => paper.category).filter(Boolean))
+          ).sort();
+          categories.forEach((category) => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categorySelect.appendChild(option);
+          });
+        };
+
+        const filterData = () => {
+          const keyword = (searchInput.value || '').trim().toLowerCase();
+          const category = categorySelect.value;
+          return papersData.filter((paper) => {
+            const haystack = [
+              paper.title,
+              paper.authors,
+              paper.year,
+              paper.venue,
+              paper.category,
+              paper.summary,
+              paper.notes,
+              paper.supportsNonlinear,
+              paper.scalability,
+              paper.constraint
+            ]
+              .filter(Boolean)
+              .join(' ')
+              .toLowerCase();
+            const matchKeyword = keyword ? haystack.includes(keyword) : true;
+            const matchCategory = category === 'all' ? true : paper.category === category;
+            return matchKeyword && matchCategory;
+          });
+        };
+
+        const applyFilters = () => {
+          const filtered = filterData();
+          renderPapers(filtered);
+          renderTable(filtered);
+        };
+
+        searchInput.addEventListener('input', applyFilters);
+        categorySelect.addEventListener('change', applyFilters);
+
+        fetch('data/papers.json')
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('无法加载数据文件');
+            }
+            return response.json();
+          })
+          .then((data) => {
+            papersData = Array.isArray(data) ? data : [];
+            populateCategories(papersData);
+            applyFilters();
+            renderReferences(papersData);
+          })
+          .catch((error) => {
+            papersContainer.innerHTML = `<p class="error">${error.message}</p>`;
+            comparisonBody.innerHTML = '<tr><td colspan="6">无法加载数据</td></tr>';
+          });
+      });
+    </script>
+  </body>
+</html>
