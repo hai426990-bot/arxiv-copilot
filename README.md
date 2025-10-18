@@ -33,12 +33,12 @@
 
 在脚本头部修改变量即可：
 
-变量	说明	默认	
-`SEARCH_QUERY`	arXiv 关键词	`"causal"`	
-`MAX_RESULTS`	每次抓多少篇	`2`	
-`PROMPT_TEMPLATE`	发给 Copilot 的提示	见脚本	
-`PAPERS_DIR`	PDF 保存目录	`"papers"`	
-`SUMMARIES_DIR`	摘要保存目录	`"summaries"`	
+变量    说明    默认    
+`SEARCH_QUERY`    arXiv 关键词    `"causal"`    
+`MAX_RESULTS`    每次抓多少篇    `2`    
+`PROMPT_TEMPLATE`    发给 Copilot 的提示    见脚本    
+`PAPERS_DIR`    PDF 保存目录    `"papers"`    
+`SUMMARIES_DIR`    摘要保存目录    `"summaries"`    
 
 ---
 
@@ -57,10 +57,20 @@
 
 🛠️ 常见问题
 
-问题	解决	
-TimeoutError	增大脚本中的 `max_wait`	
-登录失效	删除 `auth_state.json` 后重新 `--init-auth`	
-想重新抓取旧论文	删除 `history.json`	
+问题    解决    
+TimeoutError    增大脚本中的 `max_wait`    
+登录失效    删除 `auth_state.json` 后重新 `--init-auth`    
+想重新抓取旧论文    删除 `history.json`    
+
+---
+
+## 🌐 GitHub Pages 展示
+
+1. 打开 GitHub 仓库的 **Settings → Pages** 页面。
+2. 在 **Source** 下拉框中选择 `main` 分支，并将目录设置为 `docs/`。
+3. 点击 **Save**，几分钟后即可通过 `https://<用户名>.github.io/<仓库名>/` 访问静态站点。
+
+如需自定义域名或主题，可在同一页面完成进一步设置。
 
 ---
 

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title desc">
+  <title id="title">Causal Structure Discovery 标识</title>
+  <desc id="desc">由节点与箭头组成的抽象图形，象征因果结构网络。</desc>
+  <defs>
+    <linearGradient id="grad" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#60a5fa" />
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="28" fill="url(#grad)" />
+  <g fill="#ffffff" opacity="0.95">
+    <circle cx="48" cy="54" r="14" />
+    <circle cx="108" cy="42" r="11" />
+    <circle cx="116" cy="110" r="16" />
+    <circle cx="54" cy="112" r="18" />
+    <path d="M54 112l59-70" stroke="#ffffff" stroke-width="6" stroke-linecap="round" fill="none" />
+    <path d="M54 112h62" stroke="#ffffff" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.6" />
+    <path d="M108 42l20 54" stroke="#ffffff" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.8" />
+  </g>
+</svg>
