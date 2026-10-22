@@ -9,6 +9,8 @@ import arxiv
 from playwright.sync_api import Download, sync_playwright, TimeoutError as PWTimeout
 import pyperclip
 
+from quant_analysis import ANALYSIS_DIR, PaperRecord, analyze_records
+
 # ===== 配置 =====
 PAPERS_DIR = "papers"
 SUMMARIES_DIR = "summaries"
@@ -44,7 +46,7 @@ def fetch_new_papers(history, max_results=MAX_RESULTS,
     :param base_delay: 初始间隔（秒）
     :param jitter: 随机抖动范围 ±jitter
     :param max_delay: 最大间隔（秒）
-    :return: list[Path] 新下载的 PDF 文件路径
+    :return: list[PaperRecord] 新论文及其本地 PDF 路径
     """
     search = arxiv.Search(
         query=SEARCH_QUERY,
@@ -62,7 +64,21 @@ def fetch_new_papers(history, max_results=MAX_RESULTS,
 
         pdf_path = Path(PAPERS_DIR) / f"{pid}.pdf"
         result.download_pdf(filename=str(pdf_path))
-        new_files.append(pdf_path)
+        record = PaperRecord(
+            arxiv_id=pid,
+            title=result.title.strip(),
+            abstract=result.summary.strip(),
+            authors=[author.name for author in result.authors],
+            categories=list(result.categories),
+            primary_category=getattr(result.primary_category, "category", result.primary_category),
+            published=result.published.isoformat(),
+            updated=result.updated.isoformat(),
+            comment=result.comment or "",
+            journal_ref=getattr(result, "journal_ref", "") or "",
+            doi=getattr(result, "doi", "") or "",
+            pdf_path=str(pdf_path),
+        )
+        new_files.append(record)
         history.add(pid)
         print(f"[⬇] 下载: {pid}")
 
@@ -181,19 +197,19 @@ def summarize_one_pdf(page, pdf_path):
     return text_final
 
 # ===== 主流程：每篇单独浏览器 =====
-def run_pipeline():
+def run_pipeline(quant_enabled=True, enrich=True):
     history = load_history()
     new_files = fetch_new_papers(history)
     if not new_files:
         print("[ℹ] 没有新论文")
         save_history(history)
         return
-    for pdf_path in new_files:
-        fid = Path(pdf_path).stem
+    for record in new_files:
+        fid = record.arxiv_id
         try:
             with sync_playwright() as p:
                 browser, context, page = open_copilot_with_auth(p)
-                summary = summarize_one_pdf(page, pdf_path)
+                summary = summarize_one_pdf(page, record.pdf_path)
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 save_path = os.path.join(SUMMARIES_DIR, f"{fid}_{timestamp}.md")
                 with open(save_path, "w", encoding="utf-8") as f:
@@ -210,12 +226,29 @@ def run_pipeline():
                 pass
         save_history(history)
 
+    if quant_enabled:
+        try:
+            print("[📊] 生成量化分析报告...")
+            _, paths, warnings = analyze_records(
+                new_files,
+                SEARCH_QUERY,
+                enrich=enrich,
+                out_dir=ANALYSIS_DIR,
+            )
+            for warning in warnings:
+                print(f"[⚠] {warning}")
+            print(f"[📊] 量化报告: {paths['markdown']}")
+        except Exception as e:
+            print(f"[⚠] 量化分析失败: {e}")
+
 # ===== 入口 =====
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="arXiv→Copilot 自动化")
     parser.add_argument("--init-auth", action="store_true", help="初始化登录并保存会话")
+    parser.add_argument("--no-quant", action="store_true", help="跳过量化分析")
+    parser.add_argument("--offline", action="store_true", help="量化分析不访问 Semantic Scholar")
     args = parser.parse_args()
     if args.init_auth:
         init_auth_state()
     else:
-        run_pipeline()
+        run_pipeline(quant_enabled=not args.no_quant, enrich=not args.offline)

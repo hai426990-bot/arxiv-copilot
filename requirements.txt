@@ -1,3 +1,4 @@
 arxiv
 playwright
 pyperclip
+requests

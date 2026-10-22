@@ -1,0 +1,17 @@
+# 运行产物
+papers/
+summaries/
+analysis/
+auth_state.json
+history.json
+*.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# 本地环境
+.env
