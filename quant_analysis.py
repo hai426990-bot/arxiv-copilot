@@ -231,6 +231,16 @@ def _cosine(a: dict[str, float], b: dict[str, float]) -> float:
     return sum(value * b.get(term, 0.0) for term, value in a.items())
 
 
+def tfidf_vectors(docs: Sequence[Sequence[str]]) -> list[dict[str, float]]:
+    """公开接口：为一组词序列构建 L2 归一化的 TF-IDF 向量。"""
+    return _tfidf_vectors(docs)
+
+
+def cosine_similarity(a: dict[str, float], b: dict[str, float]) -> float:
+    """公开接口：两个稀疏向量的余弦相似度。"""
+    return _cosine(a, b)
+
+
 def _relevance_scores(records: Sequence[PaperRecord], query: str) -> list[float]:
     """BM25 相关性：标题权重×2，带长度归一化，最后压缩到 0~1。"""
     query_terms = sorted(set(tokenize(clean_query(query))))
